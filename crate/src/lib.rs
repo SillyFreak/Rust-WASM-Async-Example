@@ -2,8 +2,10 @@
 #![deny(warnings)]
 
 mod compat;
+mod sleep;
 
 use wasm_bindgen::prelude::*;
+use crate::sleep::sleep;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -13,6 +15,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 pub async fn run() -> Result<(), JsValue> {
     set_panic_hook();
+
+    sleep(500).await?;
 
     let window = web_sys::window().expect("should have a Window");
     let document = window.document().expect("should have a Document");
