@@ -1,3 +1,8 @@
+#![feature(async_await)]
+#![deny(warnings)]
+
+mod compat;
+
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -6,9 +11,7 @@ use wasm_bindgen::prelude::*;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-// Called by our JS entry point to run the example.
-#[wasm_bindgen]
-pub fn run() -> Result<(), JsValue> {
+pub async fn run() -> Result<(), JsValue> {
     set_panic_hook();
 
     let window = web_sys::window().expect("should have a Window");
@@ -22,6 +25,18 @@ pub fn run() -> Result<(), JsValue> {
     body.append_child(&p)?;
 
     Ok(())
+}
+
+// Called by our JS entry point to run the example.
+#[wasm_bindgen(js_name = run)]
+pub fn run_js() -> js_sys::Promise {
+    use crate::compat::future_to_promise;
+    use futures::future::FutureExt;
+
+    future_to_promise(async move {
+        run().await?;
+        Ok(JsValue::UNDEFINED)
+    }.boxed())
 }
 
 fn set_panic_hook() {
