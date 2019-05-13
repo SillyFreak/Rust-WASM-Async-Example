@@ -1,7 +1,7 @@
 use wasm_bindgen::prelude::*;
 
 pub async fn sleep(millis: i32) -> Result<(), JsValue> {
-    use crate::compat::promise_to_future;
+    use crate::compat::PromiseExt;
 
     let promise = js_sys::Promise::new(&mut move |resolve, _| {
         let window = web_sys::window().expect("should have a Window");
@@ -10,7 +10,7 @@ pub async fn sleep(millis: i32) -> Result<(), JsValue> {
         ).expect("don't expect error on setTimeout()");
     });
 
-    promise_to_future(promise).await?;
+    promise.to_future().await?;
     Ok(())
 }
 
