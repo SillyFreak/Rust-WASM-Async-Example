@@ -12,13 +12,11 @@ use wasm_bindgen_futures::{
 
 type JsFuture = Compat01As03<JsFuture01>;
 
-pub trait FutureExt {
-    fn to_promise(self) -> Promise;
-}
+impl<T: ?Sized> FutureExt for T where T: Future {}
 
-impl<F> FutureExt for F
-        where F: Future<Output=Result<JsValue, JsValue>> + 'static {
-    fn to_promise(self) -> Promise {
+pub trait FutureExt: Future {
+    fn to_promise(self) -> Promise
+            where Self: Future<Output=Result<JsValue, JsValue>> + Sized + 'static {
         // pin 0.3
         let future = Box::pin(self);
         // 0.3 to 0.1
