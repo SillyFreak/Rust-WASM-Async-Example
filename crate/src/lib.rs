@@ -25,7 +25,7 @@ pub async fn run() -> Result<(), JsValue> {
     p.set_text_content(Some("Hello from Rust, WebAssembly, and Webpack!"));
     body.append_child(&p)?;
 
-    sleep(1000).await?;
+    sleep(1000).await;
 
     let p: web_sys::Node = document.create_element("p")?.into();
     p.set_text_content(Some("...asynchronously!"));

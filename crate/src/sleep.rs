@@ -5,11 +5,10 @@ extern "C" {
     pub fn sleep_impl(millis: i32)-> js_sys::Promise;
 }
 
-pub async fn sleep(millis: i32) -> Result<(), JsValue> {
+pub async fn sleep(millis: i32) {
     use crate::compat::PromiseExt;
 
-    sleep_impl(millis).to_future().await?;
-    Ok(())
+    sleep_impl(millis).to_future().await.expect("sleep() can't fail");
 }
 
 #[wasm_bindgen(js_name = sleep)]
