@@ -16,16 +16,19 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 pub async fn run() -> Result<(), JsValue> {
     set_panic_hook();
 
-    sleep(500).await?;
-
     let window = web_sys::window().expect("should have a Window");
     let document = window.document().expect("should have a Document");
+    let body = document.body().expect("should have a body");
+    let body: &web_sys::Node = body.as_ref();
 
     let p: web_sys::Node = document.create_element("p")?.into();
     p.set_text_content(Some("Hello from Rust, WebAssembly, and Webpack!"));
+    body.append_child(&p)?;
 
-    let body = document.body().expect("should have a body");
-    let body: &web_sys::Node = body.as_ref();
+    sleep(1000).await?;
+
+    let p: web_sys::Node = document.create_element("p")?.into();
+    p.set_text_content(Some("...asynchronously!"));
     body.append_child(&p)?;
 
     Ok(())
@@ -35,12 +38,11 @@ pub async fn run() -> Result<(), JsValue> {
 #[wasm_bindgen(js_name = run)]
 pub fn run_js() -> js_sys::Promise {
     use crate::compat::future_to_promise;
-    use futures::future::FutureExt;
 
-    future_to_promise(async move {
+    future_to_promise(Box::pin(async move {
         run().await?;
         Ok(JsValue::UNDEFINED)
-    }.boxed())
+    }))
 }
 
 fn set_panic_hook() {

@@ -13,3 +13,13 @@ pub async fn sleep(millis: i32) -> Result<(), JsValue> {
     promise_to_future(promise).await?;
     Ok(())
 }
+
+#[wasm_bindgen(js_name = sleep)]
+pub fn sleep_js(millis: i32) -> js_sys::Promise {
+    use crate::compat::future_to_promise;
+
+    future_to_promise(Box::pin(async move {
+        sleep(millis).await?;
+        Ok(JsValue::UNDEFINED)
+    }))
+}
