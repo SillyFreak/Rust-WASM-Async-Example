@@ -37,12 +37,12 @@ pub async fn run() -> Result<(), JsValue> {
 // Called by our JS entry point to run the example.
 #[wasm_bindgen(js_name = run)]
 pub fn run_js() -> js_sys::Promise {
-    use crate::compat::future_to_promise;
+    use crate::compat::FutureExt;
 
-    future_to_promise(Box::pin(async move {
+    async move {
         run().await?;
         Ok(JsValue::UNDEFINED)
-    }))
+    }.to_promise()
 }
 
 fn set_panic_hook() {
