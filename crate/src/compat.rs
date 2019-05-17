@@ -1,28 +1,17 @@
 use std::future::Future;
-use futures::compat::{
-    Compat,
-    Compat01As03,
-};
 use js_sys::Promise;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::{
-    JsFuture as JsFuture01,
-    future_to_promise as future01_to_promise,
+use wasm_bindgen_futures::futures_0_3::{
+    JsFuture,
+    future_to_promise,
 };
-
-type JsFuture = Compat01As03<JsFuture01>;
 
 impl<T: ?Sized> FutureExt for T where T: Future {}
 
 pub trait FutureExt: Future {
     fn to_promise(self) -> Promise
             where Self: Future<Output=Result<JsValue, JsValue>> + Sized + 'static {
-        // pin 0.3
-        let future = Box::pin(self);
-        // 0.3 to 0.1
-        let future = Compat::new(future);
-        // 0.1 to promise
-        future01_to_promise(future)
+        future_to_promise(self)
     }
 }
 
@@ -33,9 +22,6 @@ pub trait PromiseExt<F>
 
 impl PromiseExt<JsFuture> for Promise {
     fn to_future(self) -> JsFuture {
-        // promise to 0.1
-        let future01 = JsFuture01::from(self);
-        // 0.1 to 0.3
-        Compat01As03::new(future01)
+        JsFuture::from(self)
     }
 }
