@@ -6,9 +6,10 @@ extern "C" {
 }
 
 pub async fn sleep(millis: i32) {
-    use crate::compat::PromiseExt;
+    use wasm_bindgen_futures::futures_0_3::JsFuture;
 
-    sleep_impl(millis).to_future().await.expect("sleep() can't fail");
+    let promise = sleep_impl(millis);
+    JsFuture::from(promise).await.expect("sleep() can't fail");
 }
 
 #[wasm_bindgen(js_name = sleep)]

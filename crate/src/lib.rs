@@ -1,7 +1,6 @@
 #![feature(async_await)]
 #![deny(warnings)]
 
-mod compat;
 mod sleep;
 
 use wasm_bindgen::prelude::*;
@@ -37,12 +36,12 @@ pub async fn run() -> Result<(), JsValue> {
 // Called by our JS entry point to run the example.
 #[wasm_bindgen(js_name = run)]
 pub fn run_js() -> js_sys::Promise {
-    use crate::compat::FutureExt;
+    use wasm_bindgen_futures::futures_0_3::future_to_promise;
 
-    async move {
+    future_to_promise(async move {
         run().await?;
         Ok(JsValue::UNDEFINED)
-    }.to_promise()
+    })
 }
 
 fn set_panic_hook() {
